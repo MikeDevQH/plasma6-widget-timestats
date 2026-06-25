@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+    <kcfgfile name=""/>
+    <group name="Appearance">
+        <entry name="show_day" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="day_font_size" type="Int">
+            <default>65</default>
+        </entry>
+        <entry name="day_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="day_letter_spacing" type="Int">
+            <default>17</default>
+        </entry>
+        <entry name="show_time" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="time_font_size" type="Int">
+            <default>85</default>
+        </entry>
+        <entry name="time_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="time_ampm_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="use_24_hour_format" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="show_date_day" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="date_day_font_size" type="Int">
+            <default>45</default>
+        </entry>
+        <entry name="date_day_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="show_date_month" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="date_month_font_size" type="Int">
+            <default>35</default>
+        </entry>
+        <entry name="date_month_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="show_date_year" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="date_year_font_size" type="Int">
+            <default>32</default>
+        </entry>
+        <entry name="date_year_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="show_weather" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_latitude" type="Double">
+            <default>41.3874</default>
+        </entry>
+        <entry name="weather_longitude" type="Double">
+            <default>2.1686</default>
+        </entry>
+        <entry name="weather_temp_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_icon_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_font_size" type="Int">
+            <default>16</default>
+        </entry>
+        <entry name="weather_use_celsius" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_location_set" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="weather_city_name" type="String">
+            <default></default>
+        </entry>
+        <entry name="weather_show_city" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_city_font_size" type="Int">
+            <default>12</default>
+        </entry>
+        <entry name="weather_city_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_show_condition" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_condition_font_size" type="Int">
+            <default>11</default>
+        </entry>
+        <entry name="weather_condition_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_show_feelslike" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_feelslike_font_size" type="Int">
+            <default>11</default>
+        </entry>
+        <entry name="weather_feelslike_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_show_humidity" type="Bool">
+            <default>true</default>
+        </entry>
+        <entry name="weather_humidity_font_size" type="Int">
+            <default>11</default>
+        </entry>
+        <entry name="weather_humidity_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_show_wind" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="weather_wind_font_size" type="Int">
+            <default>11</default>
+        </entry>
+        <entry name="weather_wind_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+        <entry name="weather_show_pressure" type="Bool">
+            <default>false</default>
+        </entry>
+        <entry name="weather_pressure_font_size" type="Int">
+            <default>11</default>
+        </entry>
+        <entry name="weather_pressure_font_color" type="Color">
+            <default>#FFFFFF</default>
+        </entry>
+    </group>
+</kcfg>
