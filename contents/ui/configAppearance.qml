@@ -29,7 +29,6 @@ Kirigami.ScrollablePage {
     property alias cfg_weather_temp_color: weatherTempColor.color
     property alias cfg_weather_icon_color: weatherIconColor.color
     property alias cfg_weather_font_size: weatherFontSize.value
-    property alias cfg_weather_use_celsius: useCelsius.checked
     property alias cfg_weather_show_city: weatherShowCity.checked
     property alias cfg_weather_city_font_size: weatherCityFontSize.value
     property alias cfg_weather_city_font_color: weatherCityFontColor.color
@@ -180,9 +179,6 @@ Kirigami.ScrollablePage {
             CheckBox { id: showWeather }
             Label { text: i18n("Show Weather") }
             Item { Layout.fillWidth: true }
-            Label { text: i18n("Use Celsius") }
-            CheckBox { id: useCelsius }
-            Item { width: Kirigami.Units.gridUnit }
             Label { text: i18n("Font Size") }
             SpinBox { id: weatherFontSize; from: 1; to: 999 }
         }
@@ -368,7 +364,6 @@ Kirigami.ScrollablePage {
                 cfg_weather_temp_color = "#FFFFFF"
                 cfg_weather_icon_color = "#FFFFFF"
                 cfg_weather_font_size = 16
-                cfg_weather_use_celsius = true
                 cfg_weather_show_city = true
                 cfg_weather_city_font_size = 12
                 cfg_weather_city_font_color = "#FFFFFF"
