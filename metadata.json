@@ -7,12 +7,12 @@
             }
         ],
         "Category": "Date and Time",
-        "Description": "Modern clock widget with customizable day, time, date display and integrated live weather via Open-Meteo. Features auto-location detection, city search, 12/24h format, AM/PM styling, and per-element font/color/size controls.",
+        "Description": "Fully customizable clock widget with day, time, date and live weather. Features per-element colors, fonts, sizes, language localization, 12/24h format, auto-location detection, city search, condition text, humidity, wind and pressure display. Configure every detail to match your desktop.",
         "Icon": "clock",
         "Id": "com.mike.timestats",
         "License": "GPLv3",
         "Name": "Mike TimeStats",
-        "Version": "1.1.0",
+        "Version": "1.2.0",
         "Website": ""
     },
     "X-Plasma-API-Minimum-Version": "6.0",

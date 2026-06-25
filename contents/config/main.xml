@@ -78,9 +78,6 @@
         <entry name="weather_font_size" type="Int">
             <default>16</default>
         </entry>
-        <entry name="weather_use_celsius" type="Bool">
-            <default>true</default>
-        </entry>
         <entry name="weather_location_set" type="Bool">
             <default>false</default>
         </entry>
@@ -140,6 +137,23 @@
         </entry>
         <entry name="weather_pressure_font_color" type="Color">
             <default>#FFFFFF</default>
+        </entry>
+        <entry name="date_locale_override" type="String">
+            <default></default>
+        </entry>
+    </group>
+    <group name="Units">
+        <entry name="weather_temperature_unit" type="String">
+            <default>celsius</default>
+        </entry>
+        <entry name="weather_wind_unit" type="String">
+            <default>kmh</default>
+        </entry>
+        <entry name="weather_pressure_unit" type="String">
+            <default>hpa</default>
+        </entry>
+        <entry name="weather_units_initialized" type="Bool">
+            <default>false</default>
         </entry>
     </group>
 </kcfg>
