@@ -32,6 +32,10 @@ PlasmoidItem {
     property string weatherWind: ""
     property string weatherPressure: ""
 
+    property string resolvedTempUnit: "celsius"
+    property string resolvedWindUnit: "kmh"
+    property string resolvedPressureUnit: "hpa"
+
     function detectLocation() {
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "http://ip-api.com/json/")
@@ -52,22 +56,85 @@ PlasmoidItem {
         xhr.send()
     }
 
-    function getConditionText(code) {
-        if (code === 0) return i18n("Clear")
-        if (code <= 3) return i18n("Cloudy")
-        if (code <= 48) return i18n("Fog")
-        if (code <= 55) return i18n("Drizzle")
-        if (code <= 65) return i18n("Rain")
-        if (code <= 75) return i18n("Snow")
-        if (code <= 82) return i18n("Rain Showers")
-        if (code >= 95) return i18n("Thunderstorm")
-        return ""
+    function getLocale() {
+        var ov = plasmoid.configuration.date_locale_override
+        return ov ? Qt.locale(ov) : Qt.locale()
+    }
+
+    function langCode() {
+        return getLocale().name.split("_")[0]
+    }
+
+    function trCond(code) {
+        var lang = langCode()
+        var c = {
+            0: { en: "Clear", es: "Despejado", fr: "Dégagé", de: "Klar", it: "Sereno", pt: "Limpo", nl: "Helder", ru: "Ясно", pl: "Bezchmurnie" },
+            1: { en: "Cloudy", es: "Nublado", fr: "Nuageux", de: "Bewölkt", it: "Nuvoloso", pt: "Nublado", nl: "Bewolkt", ru: "Облачно", pl: "Pochmurnie" },
+            2: { en: "Cloudy", es: "Nublado", fr: "Nuageux", de: "Bewölkt", it: "Nuvoloso", pt: "Nublado", nl: "Bewolkt", ru: "Облачно", pl: "Pochmurnie" },
+            3: { en: "Overcast", es: "Cubierto", fr: "Couvert", de: "Bedeckt", it: "Coperto", pt: "Encoberto", nl: "Betrokken", ru: "Пасмурно", pl: "Pochmurno" },
+            45: { en: "Fog", es: "Niebla", fr: "Brouillard", de: "Nebel", it: "Nebbia", pt: "Nevoeiro", nl: "Mist", ru: "Туман", pl: "Mgła" },
+            51: { en: "Drizzle", es: "Llovizna", fr: "Bruine", de: "Niesel", it: "Pioggerella", pt: "Chuvisco", nl: "Motregen", ru: "Морось", pl: "Mżawka" },
+            61: { en: "Rain", es: "Lluvia", fr: "Pluie", de: "Regen", it: "Pioggia", pt: "Chuva", nl: "Regen", ru: "Дождь", pl: "Deszcz" },
+            71: { en: "Snow", es: "Nieve", fr: "Neige", de: "Schnee", it: "Neve", pt: "Neve", nl: "Sneeuw", ru: "Снег", pl: "Śnieg" },
+            80: { en: "Rain Showers", es: "Chubascos", fr: "Averses", de: "Regenschauer", it: "Rovesci", pt: "Aguaceiros", nl: "Regenbuien", ru: "Ливни", pl: "Ulewy" },
+            95: { en: "Thunderstorm", es: "Tormenta", fr: "Orage", de: "Gewitter", it: "Temporale", pt: "Tempestade", nl: "Onweer", ru: "Гроза", pl: "Burza" }
+        }
+        var row = c[0]
+        if (code <= 3) row = code === 0 ? c[0] : code === 1 ? c[1] : code === 2 ? c[2] : c[3]
+        else if (code <= 48) row = c[45]
+        else if (code <= 55) row = c[51]
+        else if (code <= 65) row = c[61]
+        else if (code <= 75) row = c[71]
+        else if (code <= 82) row = c[80]
+        else if (code >= 95) row = c[95]
+        else return ""
+        return row[lang] || row["en"]
+    }
+
+    function trLabel(key) {
+        var lang = langCode()
+        var labels = {
+            humidity: { en: "Humidity: ", es: "Humedad: ", fr: "Humidité: ", de: "Luftfeuchtigkeit: ", it: "Umidità: ", pt: "Umidade: ",
+                        nl: "Luchtvochtigheid: ", ru: "Влажность: ", pl: "Wilgotność: ", ja: "湿度: ", ko: "습도: ", zh: "湿度: " },
+            feelslike: { en: "Feels like ", es: "Sensación térmica: ", fr: "Ressenti: ", de: "Gefühlt: ", it: "Percepita: ", pt: "Sensação: ",
+                         nl: "Gevoelstemperatuur: ", ru: "Ощущается как: ", pl: "Odczuwalna: ", ja: "体感温度: ", ko: "체감온도: ", zh: "体感: " },
+            wind: { en: "Wind: ", es: "Viento: ", fr: "Vent: ", de: "Wind: ", it: "Vento: ", pt: "Vento: ",
+                    nl: "Wind: ", ru: "Ветер: ", pl: "Wiatr: ", ja: "風: ", ko: "바람: ", zh: "风: " },
+            pressure: { en: "Pressure: ", es: "Presión: ", fr: "Pression: ", de: "Druck: ", it: "Pressione: ", pt: "Pressão: ",
+                        nl: "Druk: ", ru: "Давление: ", pl: "Ciśnienie: ", ja: "気圧: ", ko: "기압: ", zh: "气压: " }
+        }
+        var row = labels[key]
+        return row && row[lang] !== undefined ? row[lang] : labels[key]["en"]
+    }
+
+    function resolveUnits() {
+        var temp = plasmoid.configuration.weather_temperature_unit
+        var wind = plasmoid.configuration.weather_wind_unit
+        var pressure = plasmoid.configuration.weather_pressure_unit
+
+        resolvedTempUnit = temp && temp !== "" ? temp : "celsius"
+        resolvedWindUnit = wind && wind !== "" ? wind : "kmh"
+        resolvedPressureUnit = pressure && pressure !== "" ? pressure : "hpa"
+    }
+
+    function tempLabel() {
+        if (resolvedTempUnit === "fahrenheit") return "°F"
+        if (resolvedTempUnit === "kelvin") return "K"
+        return "°"
+    }
+
+    function windLabel() {
+        if (resolvedWindUnit === "mph") return " mph"
+        if (resolvedWindUnit === "ms") return " m/s"
+        if (resolvedWindUnit === "knots") return " kt"
+        return " km/h"
     }
 
     function fetchWeather() {
+        resolveUnits()
         var lat = plasmoid.configuration.weather_latitude
         var lon = plasmoid.configuration.weather_longitude
-        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,precipitation,cloud_cover,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl&timezone=auto"
+        var url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,precipitation,cloud_cover,wind_speed_10m,wind_gusts_10m,wind_direction_10m,pressure_msl&timezone=auto&temperature_unit=" + resolvedTempUnit + "&wind_speed_unit=" + resolvedWindUnit
 
         var xhr = new XMLHttpRequest()
         xhr.open("GET", url)
@@ -76,36 +143,41 @@ PlasmoidItem {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     var data = JSON.parse(xhr.responseText)
-                    var temp = data.current.temperature_2m
                     var code = data.current.weather_code
                     var hour = new Date().getHours()
                     var isDay = hour >= 6 && hour < 20
-                    var celsius = plasmoid.configuration.weather_use_celsius
 
-                    weatherTemp = celsius ? Math.round(temp) + "°" : Math.round(temp * 9/5 + 32) + "°F"
+                    weatherTemp = Math.round(data.current.temperature_2m) + tempLabel()
                     weatherIcon = getWeatherIcon(code, isDay)
-                    weatherCondition = getConditionText(code)
+                    weatherCondition = trCond(code)
 
                     if (data.current.relative_humidity_2m !== undefined)
-                        weatherHumidity = i18n("Humidity: ") + data.current.relative_humidity_2m + "%"
+                        weatherHumidity = trLabel("humidity") + data.current.relative_humidity_2m + "%"
                     else
                         weatherHumidity = ""
 
-                    if (data.current.apparent_temperature !== undefined) {
-                        var feels = data.current.apparent_temperature
-                        weatherFeelsLike = i18n("Feels like ") + (celsius ? Math.round(feels) + "°" : Math.round(feels * 9/5 + 32) + "°F")
-                    } else {
+                    if (data.current.apparent_temperature !== undefined)
+                        weatherFeelsLike = trLabel("feelslike") + Math.round(data.current.apparent_temperature) + tempLabel()
+                    else
                         weatherFeelsLike = ""
-                    }
 
                     if (data.current.wind_speed_10m !== undefined)
-                        weatherWind = i18n("Wind: ") + Math.round(data.current.wind_speed_10m) + " km/h"
+                        weatherWind = trLabel("wind") + Math.round(data.current.wind_speed_10m) + windLabel()
                     else
                         weatherWind = ""
 
-                    if (data.current.pressure_msl !== undefined)
-                        weatherPressure = i18n("Pressure: ") + Math.round(data.current.pressure_msl) + " hPa"
-                    else
+                    if (data.current.pressure_msl !== undefined) {
+                        var pval = data.current.pressure_msl
+                        var plabel = " hPa"
+                        if (resolvedPressureUnit === "inhg") {
+                            pval = pval * 0.02953
+                            plabel = " inHg"
+                        } else if (resolvedPressureUnit === "mmhg") {
+                            pval = pval * 0.75006
+                            plabel = " mmHg"
+                        }
+                        weatherPressure = trLabel("pressure") + Math.round(pval) + plabel
+                    } else
                         weatherPressure = ""
                 } else {
                     weatherTemp = "--"
@@ -150,29 +222,38 @@ PlasmoidItem {
             interval: 60000
 
             property bool use24HourFormat: plasmoid.configuration.use_24_hour_format
+            property string dateLocaleOverride: plasmoid.configuration.date_locale_override
 
             onUse24HourFormatChanged: dataChanged()
+            onDateLocaleOverrideChanged: dataChanged()
+
+            Component.onCompleted: {
+                var loc = root.getLocale()
+                console.log("TimeStats locale: " + loc.name + " (amText=" + loc.amText + ")")
+            }
 
             onDataChanged: {
                 var curDate = dataSource.data["Local"]["DateTime"]
-                display_day.text = Qt.formatDate(curDate, "dddd").toUpperCase()
+                var locale = root.getLocale()
+                var jsDay = curDate.getDay()
+                var qtDay = jsDay === 0 ? 7 : jsDay
+                display_day.text = locale.standaloneDayName(qtDay).toUpperCase()
+
                 if (use24HourFormat) {
                     display_time_digits.text = Qt.formatTime(curDate, "HH:mm")
                     display_time_ampm.text = ""
                 } else {
-                    var withAmpm = Qt.formatTime(curDate, "h:mm AP")
-                    var idx = withAmpm.indexOf(" AM")
-                    if (idx === -1) idx = withAmpm.indexOf(" PM")
-                    if (idx !== -1) {
-                        display_time_digits.text = withAmpm.substring(0, idx)
-                        display_time_ampm.text = withAmpm.substring(idx)
-                    } else {
-                        display_time_digits.text = withAmpm
-                        display_time_ampm.text = ""
-                    }
+                    var hours = curDate.getHours()
+                    var minutes = curDate.getMinutes()
+                    var minStr = minutes < 10 ? "0" + minutes : String(minutes)
+                    var h12 = hours % 12
+                    if (h12 === 0) h12 = 12
+                    display_time_digits.text = h12 + ":" + minStr
+                    display_time_ampm.text = hours < 12 ? locale.amText : locale.pmText
                 }
+
                 var dateDay = Qt.formatDate(curDate, "dd")
-                var dateMonth = Qt.formatDate(curDate, "MMMM").toUpperCase()
+                var dateMonth = locale.standaloneMonthName(curDate.getMonth() + 1).toUpperCase()
                 var dateYear = Qt.formatDate(curDate, "yyyy")
                 display_date_day.text = dateDay
                 display_date_month.text = dateMonth
@@ -349,13 +430,29 @@ PlasmoidItem {
 
         Timer {
             id: weatherTimer
-            interval: 1800000
+            interval: 120000
             running: plasmoid.configuration.show_weather
             repeat: true
             onTriggered: fetchWeather()
         }
 
+        property string weatherLocaleWatch: plasmoid.configuration.date_locale_override
+        onWeatherLocaleWatchChanged: { if (plasmoid.configuration.show_weather) fetchWeather() }
+
         Component.onCompleted: {
+            if (!plasmoid.configuration.weather_units_initialized) {
+                var locale = Qt.locale()
+                if (locale.name === "en_US") {
+                    plasmoid.configuration.weather_temperature_unit = "fahrenheit"
+                    plasmoid.configuration.weather_wind_unit = "mph"
+                    plasmoid.configuration.weather_pressure_unit = "inhg"
+                } else {
+                    plasmoid.configuration.weather_temperature_unit = "celsius"
+                    plasmoid.configuration.weather_wind_unit = "kmh"
+                    plasmoid.configuration.weather_pressure_unit = "hpa"
+                }
+                plasmoid.configuration.weather_units_initialized = true
+            }
             if (!plasmoid.configuration.weather_location_set) {
                 detectLocation()
             }
