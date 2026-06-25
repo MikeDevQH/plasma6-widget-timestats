@@ -253,7 +253,7 @@ PlasmoidItem {
                 }
 
                 var dateDay = Qt.formatDate(curDate, "dd")
-                var dateMonth = locale.standaloneMonthName(curDate.getMonth() + 1).toUpperCase()
+                var dateMonth = locale.standaloneMonthName(curDate.getMonth()).toUpperCase()
                 var dateYear = Qt.formatDate(curDate, "yyyy")
                 display_date_day.text = dateDay
                 display_date_month.text = dateMonth
