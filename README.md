@@ -1,7 +1,7 @@
 # 🕒 TimeStats - KDE Plasma 6 Widget
 
 ![Plasma 6](https://img.shields.io/badge/KDE_Plasma-6.0%2B-blue?logo=kde&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)
+![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)
 ![License](https://img.shields.io/badge/license-GPLv3-green)
 
 A modern, highly customizable clock and weather widget designed for KDE Plasma 6. Built to provide essential daily information at a glance while keeping your desktop clean and modular.
@@ -10,11 +10,14 @@ A modern, highly customizable clock and weather widget designed for KDE Plasma 6
 
 ## ✨ Features
 
-* **Advanced Time & Date:** Displays day, time, and date with full customization.
-* **Integrated Live Weather:** Accurate weather data provided by Open-Meteo.
-* **Smart Location:** Auto-location detection and manual city search capabilities.
+* **Advanced Time & Date:** Displays day, time, and date with full customization — each element independently toggleable.
+* **Integrated Live Weather:** Accurate weather data provided by Open-Meteo, refreshed every 2 minutes.
+* **Smart Location:** Auto-location detection by IP (one-time) and manual city search via Open-Meteo Geocoding.
+* **Language Localization:** 22 languages for day/month names, AM/PM text, and weather conditions/labels — system default or manual override.
+* **Configurable Units:** Temperature (°C/°F/K), wind speed (km/h/mph/m/s/kt), and pressure (hPa/inHg/mmHg) — auto-sets by locale on first run.
+* **Weather Details:** Condition text, feels-like, humidity, wind, pressure — each with independent show/hide, font size, and color.
 * **Flexible Formatting:** Choose between 12h/24h formats and toggle AM/PM styling.
-* **Total Visual Control:** Per-element controls for fonts, colors, and sizes to perfectly match your desktop theme.
+* **Total Visual Control:** Three config tabs — **Appearance** (colors, fonts, sizes), **Language**, **Units** — with per-element controls to perfectly match your desktop theme.
 
 ## 📦 Installation
 
