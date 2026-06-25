@@ -7,7 +7,7 @@
             }
         ],
         "Category": "Date and Time",
-        "Description": "Fully customizable clock widget with day, time, date and live weather. Features per-element colors, fonts, sizes, language localization, 12/24h format, auto-location detection, city search, condition text, humidity, wind and pressure display. Configure every detail to match your desktop.",
+        "Description": "Fully customizable clock widget with day, time, date and live weather. Features per-element colors, fonts, sizes, language localization (22 languages), configurable units (°C/°F/K, km/h/mph/m/s/kt, hPa/inHg/mmHg), 12/24h format, auto-location, city search, condition text, humidity, wind and pressure display. Configure every detail to match your desktop.",
         "Icon": "clock",
         "Id": "com.mike.timestats",
         "License": "GPLv3",
