@@ -64,10 +64,10 @@
             <default>true</default>
         </entry>
         <entry name="weather_latitude" type="Double">
-            <default>41.3874</default>
+            <default>20.96135</default>
         </entry>
         <entry name="weather_longitude" type="Double">
-            <default>2.1686</default>
+            <default>-76.95192</default>
         </entry>
         <entry name="weather_temp_color" type="Color">
             <default>#FFFFFF</default>

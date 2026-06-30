@@ -12,7 +12,7 @@
         "Id": "com.mike.timestats",
         "License": "GPLv3",
         "Name": "Mike TimeStats",
-        "Version": "1.2.0",
+        "Version": "2.0.0",
         "Website": ""
     },
     "X-Plasma-API-Minimum-Version": "6.0",
