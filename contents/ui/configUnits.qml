@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Layouts 1.0
-import QtQuick.Controls 2.0
-import org.kde.kirigami 2.4 as Kirigami
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import org.kde.kirigami as Kirigami
 
 Kirigami.ScrollablePage {
     id: unitsPage
@@ -34,7 +34,6 @@ Kirigami.ScrollablePage {
                 model: ListModel {
                     ListElement { label: qsTr("Celsius"); code: "celsius" }
                     ListElement { label: qsTr("Fahrenheit"); code: "fahrenheit" }
-                    ListElement { label: qsTr("Kelvin"); code: "kelvin" }
                 }
             }
         }

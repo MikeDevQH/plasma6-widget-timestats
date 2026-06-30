@@ -1,10 +1,9 @@
-import QtQml 2.15
-import QtQuick 2.0
-import QtQuick.Layouts 1.0
+import QtQml
+import QtQuick
+import QtQuick.Layouts
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
-import org.kde.plasma.plasma5support as Plasma5Support
 
 PlasmoidItem {
     id: root
@@ -21,7 +20,7 @@ PlasmoidItem {
     }
     FontLoader {
         id: font_weathericons
-        source: "../fonts/weathericons-regular-webfont-2.0.11.ttf"
+        source: "../fonts/weathericons-regular-webfont.ttf"
     }
 
     property string weatherIcon: ""
@@ -38,18 +37,27 @@ PlasmoidItem {
 
     function detectLocation() {
         var xhr = new XMLHttpRequest()
-        xhr.open("GET", "http://ip-api.com/json/")
+        // Usamos geojs.io que es HTTPS, gratuita y no bloquea widgets de QML
+        xhr.open("GET", "https://get.geojs.io/v1/ip/geo.json")
         xhr.timeout = 5000
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText)
-                    if (data.status === "success") {
-                        plasmoid.configuration.weather_latitude = data.lat
-                        plasmoid.configuration.weather_longitude = data.lon
-                        plasmoid.configuration.weather_city_name = data.city + ", " + data.countryCode
-                        plasmoid.configuration.weather_location_set = true
+                    try {
+                        var data = JSON.parse(xhr.responseText)
+
+                        // GeoJS devuelve los datos como texto, usamos parseFloat para convertirlos a números
+                        if (data.latitude && data.longitude) {
+                            plasmoid.configuration.weather_latitude = parseFloat(data.latitude)
+                            plasmoid.configuration.weather_longitude = parseFloat(data.longitude)
+                            plasmoid.configuration.weather_city_name = data.city + ", " + data.country_code
+                            plasmoid.configuration.weather_location_set = true
+                        }
+                    } catch (e) {
+                        console.error("Error al procesar el JSON: " + e)
                     }
+                } else {
+                    console.error("Fallo en la petición HTTP: Código " + xhr.status)
                 }
             }
         }
@@ -118,9 +126,9 @@ PlasmoidItem {
     }
 
     function tempLabel() {
-        if (resolvedTempUnit === "fahrenheit") return "°F"
-        if (resolvedTempUnit === "kelvin") return "K"
-        return "°"
+        if (resolvedTempUnit === "fahrenheit") return "&nbsp;<font face='" + font_weathericons.name + "'>\uf045</font>"
+            if (resolvedTempUnit === "kelvin") return "&nbsp;K"
+                return "&nbsp;<font face='" + font_weathericons.name + "'>\uf03c</font>"
     }
 
     function windLabel() {
@@ -149,12 +157,14 @@ PlasmoidItem {
 
                     weatherTemp = Math.round(data.current.temperature_2m) + tempLabel()
                     weatherIcon = getWeatherIcon(code, isDay)
-                    weatherCondition = trCond(code)
+                    weatherCondition = trCond(code) + "&nbsp;&nbsp;<font face='" + font_weathericons.name + "'>" + weatherIcon + "</font>"
 
-                    if (data.current.relative_humidity_2m !== undefined)
-                        weatherHumidity = trLabel("humidity") + data.current.relative_humidity_2m + "%"
-                    else
+                    if (data.current.relative_humidity_2m !== undefined) {
+                        // Reemplazamos el "%" por el ícono de humedad usando HTML
+                        weatherHumidity = trLabel("humidity") + data.current.relative_humidity_2m + "&nbsp;<font face='" + font_weathericons.name + "'>\uf07a</font>"
+                    } else {
                         weatherHumidity = ""
+                    }
 
                     if (data.current.apparent_temperature !== undefined)
                         weatherFeelsLike = trLabel("feelslike") + Math.round(data.current.apparent_temperature) + tempLabel()
@@ -214,51 +224,51 @@ PlasmoidItem {
         Layout.preferredWidth: Layout.minimumWidth
         Layout.preferredHeight: Layout.minimumHeight
 
-        Plasma5Support.DataSource {
-            id: dataSource
-            engine: "time"
-            connectedSources: ["Local"]
-            intervalAlignment: Plasma5Support.Types.AlignToMinute
+        function updateClock() {
+            var curDate = new Date()
+            var locale = root.getLocale()
+            var jsDay = curDate.getDay()
+            var qtDay = jsDay === 0 ? 7 : jsDay
+            display_day.text = locale.standaloneDayName(qtDay).toUpperCase()
+
+            if (plasmoid.configuration.use_24_hour_format) {
+                display_time_digits.text = Qt.formatTime(curDate, "HH:mm")
+                display_time_ampm.text = ""
+            } else {
+                var hours = curDate.getHours()
+                var minutes = curDate.getMinutes()
+                var minStr = minutes < 10 ? "0" + minutes : String(minutes)
+                var h12 = hours % 12
+                if (h12 === 0) h12 = 12
+                display_time_digits.text = h12 + ":" + minStr
+                display_time_ampm.text = hours < 12 ? locale.amText : locale.pmText
+            }
+
+            var dateDay = Qt.formatDate(curDate, "dd")
+            var dateMonth = locale.standaloneMonthName(curDate.getMonth()).toUpperCase()
+            var dateYear = Qt.formatDate(curDate, "yyyy")
+            display_date_day.text = dateDay
+            display_date_month.text = dateMonth
+            display_date_year.text = dateYear
+        }
+
+        Connections {
+            target: plasmoid.configuration
+
+            function onWeather_temperature_unitChanged() { fetchWeather() }
+            function onWeather_wind_unitChanged() { fetchWeather() }
+            function onWeather_pressure_unitChanged() { fetchWeather() }
+            function onDate_locale_overrideChanged() { updateClock(); fetchWeather() }
+            function onUse_24_hour_formatChanged() { updateClock() }
+        }
+
+        Timer {
+            id: clockTimer
             interval: 60000
-
-            property bool use24HourFormat: plasmoid.configuration.use_24_hour_format
-            property string dateLocaleOverride: plasmoid.configuration.date_locale_override
-
-            onUse24HourFormatChanged: dataChanged()
-            onDateLocaleOverrideChanged: dataChanged()
-
-            Component.onCompleted: {
-                var loc = root.getLocale()
-                console.log("TimeStats locale: " + loc.name + " (amText=" + loc.amText + ")")
-            }
-
-            onDataChanged: {
-                var curDate = dataSource.data["Local"]["DateTime"]
-                var locale = root.getLocale()
-                var jsDay = curDate.getDay()
-                var qtDay = jsDay === 0 ? 7 : jsDay
-                display_day.text = locale.standaloneDayName(qtDay).toUpperCase()
-
-                if (use24HourFormat) {
-                    display_time_digits.text = Qt.formatTime(curDate, "HH:mm")
-                    display_time_ampm.text = ""
-                } else {
-                    var hours = curDate.getHours()
-                    var minutes = curDate.getMinutes()
-                    var minStr = minutes < 10 ? "0" + minutes : String(minutes)
-                    var h12 = hours % 12
-                    if (h12 === 0) h12 = 12
-                    display_time_digits.text = h12 + ":" + minStr
-                    display_time_ampm.text = hours < 12 ? locale.amText : locale.pmText
-                }
-
-                var dateDay = Qt.formatDate(curDate, "dd")
-                var dateMonth = locale.standaloneMonthName(curDate.getMonth()).toUpperCase()
-                var dateYear = Qt.formatDate(curDate, "yyyy")
-                display_date_day.text = dateDay
-                display_date_month.text = dateMonth
-                display_date_year.text = dateYear
-            }
+            running: true
+            repeat: true
+            triggeredOnStart: true
+            onTriggered: updateClock()
         }
 
         Column {
@@ -337,16 +347,18 @@ PlasmoidItem {
                 spacing: 12
                 visible: plasmoid.configuration.show_weather
 
-                Column {
+                Row { // <-- Cambiamos Column por Row
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 0
+                    spacing: 10 // Espacio entre el termómetro y los números (puedes ajustarlo)
 
                     PlasmaComponents.Label {
                         id: display_weather_icon
                         font.family: font_weathericons.name
                         font.pixelSize: plasmoid.configuration.weather_font_size
                         color: plasmoid.configuration.weather_icon_color
-                        text: weatherIcon
+                        textFormat: Text.RichText
+                        text: "\uf055" // El termómetro
+                        anchors.verticalCenter: parent.verticalCenter // Para que quede a la misma altura que los números
                     }
 
                     PlasmaComponents.Label {
@@ -354,8 +366,9 @@ PlasmoidItem {
                         font.family: font_nasalization.name
                         font.pixelSize: plasmoid.configuration.weather_font_size
                         color: plasmoid.configuration.weather_temp_color
-                        text: weatherTemp
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        textFormat: Text.RichText
+                        text: weatherTemp // Aquí está el número y el ícono de ºC / ºF
+                        anchors.verticalCenter: parent.verticalCenter // Para que quede a la misma altura que el termómetro
                     }
                 }
 
@@ -387,12 +400,14 @@ PlasmoidItem {
                         font.pixelSize: plasmoid.configuration.weather_condition_font_size
                         font.family: font_nasalization.name
                         color: plasmoid.configuration.weather_condition_font_color
+                        textFormat: Text.RichText
                     }
 
                     PlasmaComponents.Label {
                         id: display_weather_feelslike
                         visible: plasmoid.configuration.weather_show_feelslike && weatherFeelsLike !== ""
                         text: weatherFeelsLike
+                        textFormat: Text.RichText
                         font.pixelSize: plasmoid.configuration.weather_feelslike_font_size
                         font.family: font_nasalization.name
                         color: plasmoid.configuration.weather_feelslike_font_color
@@ -401,6 +416,7 @@ PlasmoidItem {
                     PlasmaComponents.Label {
                         id: display_weather_humidity
                         visible: plasmoid.configuration.weather_show_humidity && weatherHumidity !== ""
+                        textFormat: Text.RichText
                         text: weatherHumidity
                         font.pixelSize: plasmoid.configuration.weather_humidity_font_size
                         font.family: font_nasalization.name
@@ -435,9 +451,6 @@ PlasmoidItem {
             repeat: true
             onTriggered: fetchWeather()
         }
-
-        property string weatherLocaleWatch: plasmoid.configuration.date_locale_override
-        onWeatherLocaleWatchChanged: { if (plasmoid.configuration.show_weather) fetchWeather() }
 
         Component.onCompleted: {
             if (!plasmoid.configuration.weather_units_initialized) {

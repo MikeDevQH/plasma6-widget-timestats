@@ -1,8 +1,8 @@
-import QtQuick 2.15
-import QtQuick.Layouts 1.0
-import QtQuick.Controls 2.0
-import org.kde.kirigami 2.4 as Kirigami
-import org.kde.kquickcontrols 2.0 as KQControls
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+import org.kde.kirigami as Kirigami
+import org.kde.kquickcontrols as KQControls
 
 Kirigami.ScrollablePage {
     id: appearancePage
@@ -70,18 +70,27 @@ Kirigami.ScrollablePage {
 
     function detectLocation() {
         var xhr = new XMLHttpRequest()
-        xhr.open("GET", "http://ip-api.com/json/")
+        // Usamos geojs.io que es HTTPS, gratuita y no bloquea widgets de QML
+        xhr.open("GET", "https://get.geojs.io/v1/ip/geo.json")
         xhr.timeout = 5000
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText)
-                    if (data.status === "success") {
-                        plasmoid.configuration.weather_latitude = data.lat
-                        plasmoid.configuration.weather_longitude = data.lon
-                        plasmoid.configuration.weather_city_name = data.city + ", " + data.countryCode
-                        plasmoid.configuration.weather_location_set = true
+                    try {
+                        var data = JSON.parse(xhr.responseText)
+
+                        // GeoJS devuelve los datos como texto, usamos parseFloat para convertirlos a números
+                        if (data.latitude && data.longitude) {
+                            plasmoid.configuration.weather_latitude = parseFloat(data.latitude)
+                            plasmoid.configuration.weather_longitude = parseFloat(data.longitude)
+                            plasmoid.configuration.weather_city_name = data.city + ", " + data.country_code
+                            plasmoid.configuration.weather_location_set = true
+                        }
+                    } catch (e) {
+                        console.error("Error al procesar el JSON: " + e)
                     }
+                } else {
+                    console.error("Fallo en la petición HTTP: Código " + xhr.status)
                 }
             }
         }
@@ -239,6 +248,15 @@ Kirigami.ScrollablePage {
             ColorDial { id: weatherIconColor; color: cfg_weather_icon_color; label: i18n("Icon Color") }
         }
 
+        Label {
+            Layout.fillWidth: true
+            text: "Weather data is refreshed every 2 minutes."
+            wrapMode: Text.WordWrap
+            color: Kirigami.Theme.disabledTextColor
+        }
+
+        Kirigami.Separator { Layout.fillWidth: true }
+
         Kirigami.Heading {
             text: i18n("City")
             level: 3
@@ -355,9 +373,9 @@ Kirigami.ScrollablePage {
                 cfg_date_year_font_size = 32
                 cfg_date_year_font_color = "#FFFFFF"
                 cfg_show_weather = true
-                plasmoid.configuration.weather_latitude = 41.3874
-                plasmoid.configuration.weather_longitude = 2.1686
-                plasmoid.configuration.weather_city_name = "Barcelona, Spain"
+                plasmoid.configuration.weather_latitude = 20.96135
+                plasmoid.configuration.weather_longitude = -76.95192
+                plasmoid.configuration.weather_city_name = "Las Tunas, Cuba"
                 plasmoid.configuration.weather_location_set = true
                 searchModel.clear()
                 citySearch.text = ""
